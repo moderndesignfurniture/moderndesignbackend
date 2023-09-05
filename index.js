@@ -14,7 +14,10 @@ import bucket from './Bucket/Firebase.js';
 import fs from 'fs';
 import path from 'path';
 import { tweetModel } from './Models/User.js';
-app.use(cookieParser());
+app.use(cors({
+  origin: ['https://www.equipmentsuppliers.co.uk' ,  "*"],
+  credentials: true
+}));
 app.use(express.urlencoded({ extended: false }))
 app.use(cors({
   origin: ['http://localhost:3000', "*"],
