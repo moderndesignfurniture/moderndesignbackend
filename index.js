@@ -378,7 +378,7 @@ app.post('/logout', (req, res) => {
       sameSite: 'none', // Change to 'strict' if not using HTTPS
       secure: true,     // Remove this line if not using HTTPS
       path: '/',         // Make sure the path matches the one used when setting the token cookie
-      domain: 'http://localhost:3000/', // Make sure the domain matches the one used when setting the token cookie
+      domain: 'https://www.equipmentsuppliers.co.uk', // Make sure the domain matches the one used when setting the token cookie
     });
 
     res.send({ message: "Logout successful" });
@@ -387,6 +387,7 @@ app.post('/logout', (req, res) => {
     res.status(500).send({ message: "Logout failed, please try later" });
   }
 });
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
