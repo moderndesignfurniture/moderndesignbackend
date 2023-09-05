@@ -341,6 +341,7 @@ app.post('/login', async (req, res) => {
 //   });
 // })
 app.get('/api/v1/profile', (req, res) => {
+  console.log(req.body)
   const _id = req.body.token._id
   const getData = async () => {
     try {
