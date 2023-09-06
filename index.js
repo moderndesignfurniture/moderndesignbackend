@@ -14,16 +14,12 @@ import bucket from './Bucket/Firebase.js';
 import fs from 'fs';
 import path from 'path';
 import { tweetModel } from './Models/User.js';
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }))
 app.use(cors({
   origin: ['https://www.equipmentsuppliers.co.uk' ,  "*"],
   credentials: true
 }));
-app.use(express.urlencoded({ extended: false }))
-app.use(cors({
-  origin: ['http://localhost:3000', "*"],
-  credentials: true
-}));
-// app.use(express.json()); 
 const storage = multer.diskStorage({
   destination: '/tmp',
   filename: function (req, file, cb) {
@@ -299,49 +295,48 @@ app.post('/login', async (req, res) => {
     res.status(500).send({ message: "login failed, please try later" });
   }
 });
-// app.use('/api/v1', (req, res, next) => {
+app.use('/api/v1', (req, res, next) => {
 
-//   console.log("req.cookies: ", req.cookies.Token);
+  console.log("req.cookies: ", req.cookies.Token);
 
-//   if (!req?.cookies?.Token) {
-//     res.status(401).send({
-//       message: "include http-only credentials with every request"
-//     })
-//     return;
-//   }
+  if (!req?.cookies?.Token) {
+    res.status(401).send({
+      message: "include http-only credentials with every request"
+    })
+    return;
+  }
 
-//   jwt.verify(req.cookies.Token, SECRET, function (err, decodedData) {
-//     if (!err) {
+  jwt.verify(req.cookies.Token, SECRET, function (err, decodedData) {
+    if (!err) {
 
-//       console.log("decodedData: ", decodedData);
+      console.log("decodedData: ", decodedData);
 
-//       const nowDate = new Date().getTime() / 1000;
+      const nowDate = new Date().getTime() / 1000;
 
-//       if (decodedData.exp < nowDate) {
+      if (decodedData.exp < nowDate) {
 
-//         res.status(401);
-//         res.cookie('Token', '', {
-//           maxAge: 1,
-//           httpOnly: true,
-//           sameSite: 'none',
-//           secure: true
-//         });
-//         res.send({ message: "token expired" })
+        res.status(401);
+        res.cookie('Token', '', {
+          maxAge: 1,
+          httpOnly: true,
+          sameSite: 'none',
+          secure: true
+        });
+        res.send({ message: "token expired" })
 
-//       } else {
+      } else {
 
-//         console.log("token approved");
+        console.log("token approved");
 
-//         req.body.token = decodedData
-//         next();
-//       }
-//     } else {
-//       res.status(401).send("invalid token")
-//     }
-//   });
-// })
+        req.body.token = decodedData
+        next();
+      }
+    } else {
+      res.status(401).send("invalid token")
+    }
+  });
+})
 app.get('/api/v1/profile', (req, res) => {
-  console.log(req.body)
   const _id = req.body.token._id
   const getData = async () => {
     try {
@@ -379,7 +374,7 @@ app.post('/logout', (req, res) => {
       sameSite: 'none', // Change to 'strict' if not using HTTPS
       secure: true,     // Remove this line if not using HTTPS
       path: '/',         // Make sure the path matches the one used when setting the token cookie
-      domain: 'https://www.equipmentsuppliers.co.uk', // Make sure the domain matches the one used when setting the token cookie
+      domain: 'http://localhost:3000/', // Make sure the domain matches the one used when setting the token cookie
     });
 
     res.send({ message: "Logout successful" });
@@ -388,7 +383,6 @@ app.post('/logout', (req, res) => {
     res.status(500).send({ message: "Logout failed, please try later" });
   }
 });
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
