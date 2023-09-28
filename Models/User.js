@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
 
 
 const productSchema = new mongoose.Schema({
+    email : { type: String },
     name : { type: String },
     price: { type: String , required: true },
     description : { type: String, required: true },
