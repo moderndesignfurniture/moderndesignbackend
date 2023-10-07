@@ -21,7 +21,17 @@ const productSchema = new mongoose.Schema({
 });
 export const tweetModel = mongoose.model('ProductsAll', productSchema);
   
-
+const requestSchema = new mongoose.Schema({
+    email : { type: String },
+    name : { type: String },
+    price: { type: String , required: true },
+    description : { type: String, required: true },
+    imageUrl: { type: String  ,  required: true },
+    category: { type: String ,  required: true },
+    isApproved: { type: Boolean, default: false },
+    createdOn: { type: Date, default: Date.now },
+});
+export const requestModel = mongoose.model('RequestAll', requestSchema);
 
 
 const User = mongoose.model('User', userSchema);

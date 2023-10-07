@@ -14,6 +14,8 @@ import bucket from "./Bucket/Firebase.js";
 import fs from "fs";
 import path from "path";
 import { tweetModel } from "./Models/User.js";
+import { requestModel } from "./Models/User.js";
+
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(
@@ -37,7 +39,7 @@ app.get("/", (req, res) => {
 app.get("/api/search", async (req, res) => {
   const searchTerm = req.query.q;
   try {
-    const results = await tweetModel.find({
+    const results = await requestModel.find({
       name: new RegExp(searchTerm, "i"),
     });
     res.json(results);
@@ -47,12 +49,12 @@ app.get("/api/search", async (req, res) => {
 });
 app.get("/api/v1/paginatpost", async (req, res) => {
   try {
-    let query = tweetModel.find();
+    let query = requestModel.find({isApproved : true});
 
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * pageSize;
-    const total = await tweetModel.countDocuments();
+    const total = await requestModel.countDocuments();
 
     const pages = Math.ceil(total / pageSize);
 
@@ -115,24 +117,7 @@ app.get("/api/v1/AllUser", async (req, res) => {
 });
 
 
-app.get("/api/v1/selectuserproducts", async (req, res) => {
-  try {
 
-    const emailid = req.params.email;
-    
-    const existingUser = await tweetModel.findOne({ email: emailid });
-
-    res.send({
-      message: "Got user products successfully",
-      data: existingUser,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
 
 
 app.delete("/api/v1/customer/:id", async (req, res) => {
@@ -156,6 +141,28 @@ app.delete("/api/v1/customer/:id", async (req, res) => {
     });
   }
 });
+app.delete("/api/v1/request/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const deletedData = await requestModel.deleteOne({ _id: id });
+
+    if (deletedData.deletedCount !== 0) {
+      res.send({
+        message: "request has been deleted successfully",
+      });
+    } else {
+      res.status(404).send({
+        message: "No request found with this id: " + id,
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
 
 app.delete("/api/v1/user/:id", async (req, res) => {
   const id = req.params.id;
@@ -453,6 +460,318 @@ app.post("/logout", (req, res) => {
     res.status(500).send({ message: "Logout failed, please try later" });
   }
 });
+
+
+app.put("/EditProduct/:id", async (req,res) => {
+
+    const productId = req.params.id;
+    const product = await tweetModel.findOne({_id:productId});
+
+    if (!product) {
+
+       email = req.body.email;
+        product.name = req.body.name;
+        price = req.body.price;
+        description = req.body.descryption;
+        imageUrl = req.body.image;
+        category = req.body.category;
+
+        const savedProduct = await product.save();
+        res.send({message: "product editted", product : savedProduct})
+
+    }
+    else {
+        res.send({message: "product not editted", product : savedProduct})
+
+    }
+
+});
+
+
+app.get("/singleproducts/:id", async (req, res) => {
+  const productId = req.params.id;
+  try {
+    const result = await requestModel.find({_id : productId}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all products successfully",
+      data: result,
+    });
+    console.log(result);
+console.log(productId);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.get("/selectproducts/:email", async (req, res) => {
+  let body = req.body;
+  const Email = req.params.email;
+  try {
+    const result = await requestModel.find({email : Email}).exec(); // Using .exec() to execute the query
+    console.log(Email);
+    res.send({
+      message: "Got all products successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+// admin product request api
+
+app.post("/productrequest", upload.any(), (req, res) => {
+  try {
+    const body = req.body;
+
+    if (
+      // validation
+      !body.email ||
+      !body.name ||
+      !body.price ||
+      !body.description
+    ) {
+      res.status(400).send({
+        message: "required parameters missing",
+      });
+      return;
+    }
+
+    console.log("req.body: ", req.body);
+    console.log("req.files: ", req.files);
+
+    console.log("uploaded file name: ", req.files[0].originalname);
+    console.log("file type: ", req.files[0].mimetype);
+    console.log("file name in server folders: ", req.files[0].filename);
+    console.log("file path in server folders: ", req.files[0].path);
+
+    bucket.upload(
+      req.files[0].path,
+      {
+        destination: `tweetPictures/${req.files[0].filename}`, // give destination name if you want to give a certain name to file in bucket, include date to make name unique otherwise it will replace previous file with the same name
+      },
+      function (err, file, apiResponse) {
+        if (!err) {
+          file
+            .getSignedUrl({
+              action: "read",
+              expires: "03-09-2999",
+            })
+            .then((urlData, err) => {
+              if (!err) {
+                console.log("public downloadable url: ", urlData[0]); // this is public downloadable url
+
+                try {
+                  fs.unlinkSync(req.files[0].path);
+                  //file removed
+                } catch (err) {
+                  console.error(err);
+                }
+
+                let addPRoduct = new requestModel({
+                  email: body.email,
+                  name: body.name,
+                  price: body.price,
+                  imageUrl: urlData[0],
+                  description: body.description,
+                  category: body.value,
+                });
+
+                addPRoduct.save().then((res) => {
+                  // res.send(res)
+
+                  console.log(res, "ProDUCT ADD");
+                });
+
+                
+              }
+            });
+        } else {
+          console.log("err: ", err);
+          res.status(500).send();
+        }
+      }
+    );
+  } catch (error) {
+    console.log("error: ", error);
+  }
+});
+
+app.get("/productrequestall", async (req, res) => {
+  try {
+    const result = await requestModel.find({isApproved : false}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all products successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.get("/productrequestalltrue", async (req, res) => {
+  try {
+    const result = await requestModel.find({isApproved : true}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all products successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.delete("/productreq/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const deletedData = await requestModel.deleteOne({ _id: id });
+
+    if (deletedData.deletedCount !== 0) {
+      res.send({
+        message: "Product has been deleted successfully",
+      });
+    } else {
+      res.status(404).send({
+        message: "No Product found with this id: " + id,
+      });
+    }
+    console.log("id",id);
+  } catch (err) {
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.get("/productreqedit/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const FindData = await requestModel.findById({ _id: id });
+
+    if (FindData) {
+     // FindData.isApproved = true;
+   await FindData.updateOne({ isApproved: true });
+      res.send({
+        message: "Product has been approved successfully",
+        data : FindData,
+      });
+    } else {
+      res.status(404).send({
+        message: "No Product found with this id: " + id,
+      });
+    }
+    console.log("data",FindData);
+    console.log("id",id);
+  } catch (err) {
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+
+});
+
+
+//edit prodcut checking
+app.get("/singleproduct/:id", async (req,res) => {     //chane name into id
+
+  const productId = req.params.id;
+  const product = await requestModel.findOne({_id:productId});
+
+  res.send({message: "product found", Product : product})
+
+
+});
+
+app.put("/editsProducts/:id", async (req,res) => {
+
+  const productId = req.params.id;
+  const updatedProductData = req.body;
+
+  try{
+  const product = await requestModel.findByIdAndUpdate(productId, updatedProductData, {
+    new: true, // Return the updated product
+  });
+  if (!product) {
+    return res.status(404).json({ message: 'Product not found' });
+  }
+
+  res.json(product);
+}
+catch {
+  res.status(500).json({ message: 'Server Error' });
+}
+
+
+});
+
+//edit user 
+
+app.get("/edituser/:id", async (req,res) => {     
+
+  const UserId = req.params.id;
+  const users = await User.findOne({_id:UserId});
+
+  res.send({message: "User found", Product : users})
+});
+
+
+
+app.put("/edittedUsers/:id", async (req,res) => {
+
+  const UserID = req.params.id;
+  const updatedUserData = req.body;
+
+  try{
+  const product = await User.findByIdAndUpdate(UserID, updatedUserData, {
+    new: true, 
+  });
+  if (!product) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  res.json(product);
+}
+catch {
+  res.status(500).json({ message: 'Server Error' });
+}
+});
+
+//checking user product display in user dashboard
+app.get("/productsdisplay/:email", async (req, res) => {
+  const Email = req.params.email;
+  try {
+    const result = await requestModel.find({email : Email}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all products successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+console.log("email",Email);
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
