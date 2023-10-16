@@ -283,7 +283,7 @@ app.post("/api/v1/AddProduct", upload.any(), (req, res) => {
 });
 app.post("/signup", async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, phone , password } = req.body;
 
     // Check if user with the given email already exists
     const existingUser = await User.findOne({ email });
@@ -296,6 +296,7 @@ app.post("/signup", async (req, res) => {
     const newUser = new User({
       username,
       email,
+      phone,
       password,
     });
 
@@ -308,6 +309,45 @@ app.post("/signup", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+app.post("/register", async (req, res) => {
+  try {
+    const { firstname, lastname, email, phone ,company,postal,vat,address,companyaddress,country,city,state, password } = req.body;
+
+    // Check if user with the given email already exists
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+
+    // Create a new user
+    const newUser = new User({
+      firstname,
+      lastname,
+      email,
+      phone,
+      company,
+      postal,
+      vat,
+      address,
+      companyaddress,
+      country,
+      city,
+      state,
+      password,
+    });
+
+    // Save the user to the database
+    await newUser.save();
+
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.post("/login", async (req, res) => {
   try {
     let body = req.body;
@@ -536,6 +576,7 @@ app.post("/productrequest", upload.any(), (req, res) => {
       !body.email ||
       !body.name ||
       !body.price ||
+      !body.subcategory ||
       !body.description
     ) {
       res.status(400).send({
@@ -579,9 +620,11 @@ app.post("/productrequest", upload.any(), (req, res) => {
                   email: body.email,
                   name: body.name,
                   price: body.price,
+                  category: body.value,
+                  subcategory : body.subcategory,
                   imageUrl: urlData[0],
                   description: body.description,
-                  category: body.value,
+
                 });
 
                 addPRoduct.save().then((res) => {

@@ -3,9 +3,21 @@ const mongodbURI = process.env.mongodbURI || "mongodb+srv://samrajafri018:12345@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 const userSchema = new mongoose.Schema({
-  username: String,
+  //username: String,
+  firstname: String,
+  lastname: String,
   email: String,
+  phone: String,
+  company: String,
+  postal: String,
+  vat: String,
+  address: String,
+  companyaddress: String,
+  country: String,
+  city: String,
+  state: String,
   password: String,
+  createdOn: { type: Date, default: Date.now },
 });
 
 
@@ -25,9 +37,10 @@ const requestSchema = new mongoose.Schema({
     email : { type: String },
     name : { type: String },
     price: { type: String , required: true },
+    category: { type: String ,  required: true },
+    subcategory: { type: String ,  required: true },
     description : { type: String, required: true },
     imageUrl: { type: String  ,  required: true },
-    category: { type: String ,  required: true },
     isApproved: { type: Boolean, default: false },
     createdOn: { type: Date, default: Date.now },
 });
