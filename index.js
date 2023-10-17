@@ -20,7 +20,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(
   cors({
-    origin: ["https://equipmentsuppliers.co.uk", "*"],
+    origin: ["http://localhost:3000", "*"],
     credentials: true,
   })
 );
@@ -815,6 +815,158 @@ app.get("/productsdisplay/:email", async (req, res) => {
 console.log("email",Email);
 });
 
+// category displays
+
+app.get("/Refrigration", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Refrigeration"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
+
+app.get("/Diswashing", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Diswashing"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
+app.get("/Appliances", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Appliances"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
+
+app.get("/Stainlesssteel", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Stainless Steel"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
