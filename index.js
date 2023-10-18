@@ -20,7 +20,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(
   cors({
-    origin: ["https://www.equipmentsuppliers.co.uk", "*"],
+    origin: ["http://localhost:3000", "*"],
     credentials: true,
   })
 );
@@ -930,7 +930,7 @@ app.get("/Appliances", async (req, res) => {
   }
 });
 
-app.get("/Stainlesssteel", async (req, res) => {
+app.get("/StainlessSteel", async (req, res) => {
   try {
     let query = requestModel.find({category : "Stainless Steel"});
 
@@ -967,6 +967,236 @@ app.get("/Stainlesssteel", async (req, res) => {
     });
   }
 });
+
+app.get("/Cooking", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Cooking"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
+
+app.get("/Foodprep", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Food prep"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
+
+app.get("/Beverage", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Beverage Equipment"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
+
+app.get("/pizzeria", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Pizzeria & Grill"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
+
+app.get("/ovens", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Oven & Steamers"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
+
+app.get("/Utensils", async (req, res) => {
+  try {
+    let query = requestModel.find({category : "Utensils"});
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * pageSize;
+    const total = await requestModel.countDocuments();
+
+    const pages = Math.ceil(total / pageSize);
+
+    query = query.skip(skip).limit(pageSize);
+
+    if (page > pages) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No page found",
+      });
+    }
+
+    const result = await query;
+    console.log(result);
+    res.status(200).json({
+      status: "success",
+      count: result.length,
+      page,
+      pages: pages,
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Server Error",
+    });
+  }
+});
+
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
