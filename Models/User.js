@@ -1,50 +1,17 @@
 import mongoose from 'mongoose';
-const mongodbURI = process.env.mongodbURI || "mongodb+srv://samrajafri018:12345@cluster0.b8ydbpc.mongodb.net/";
+const mongodbURI = process.env.mongodbURI || "mongodb+srv://shaikhahsanali0303:brandsteps1234@cluster0.fh825iv.mongodb.net/?retryWrites=true&w=majority";
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 const userSchema = new mongoose.Schema({
-  //username: String,
-  firstname: String,
-  lastname: String,
+  username: String,
   email: String,
   phone: String,
-  company: String,
-  postal: String,
-  vat: String,
-  address: String,
-  companyaddress: String,
   country: String,
-  city: String,
-  state: String,
   password: String,
   createdOn: { type: Date, default: Date.now },
 });
 
 
-
-const productSchema = new mongoose.Schema({
-    email : { type: String },
-    name : { type: String },
-    price: { type: String , required: true },
-    description : { type: String, required: true },
-    imageUrl: { type: String  ,  required: true },
-    category: { type: String ,  required: true },
-    createdOn: { type: Date, default: Date.now },
-});
-export const tweetModel = mongoose.model('ProductsAll', productSchema);
-  
-const requestSchema = new mongoose.Schema({
-    email : { type: String },
-    name : { type: String },
-    price: { type: String , required: true },
-    category: { type: String ,  required: true },
-    subcategory: { type: String ,  required: true },
-    description : { type: String, required: true },
-    imageUrl: { type: String  ,  required: true },
-    isApproved: { type: Boolean, default: false },
-    createdOn: { type: Date, default: Date.now },
-});
-export const requestModel = mongoose.model('RequestAll', requestSchema);
 
 
 const User = mongoose.model('User', userSchema);
