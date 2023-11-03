@@ -11,8 +11,43 @@ const userSchema = new mongoose.Schema({
   createdOn: { type: Date, default: Date.now },
 });
 
+const singlegroupSchema = new mongoose.Schema({
+    groupname: String,
+    email: String,
+    whatsapp: String,
+    experience: String,
+    totalclients: String,
+    paymentoption: String,
+    createdOn: { type: Date, default: Date.now },
+  });
+  export const signalModel = mongoose.model('signalgroup', singlegroupSchema);
 
+  const managerSchema = new mongoose.Schema({
+    groupname: String,
+    email: String,
+    whatsapp: String,
+    experience: String,
+    totalclients: String,
+    paymentoption: String,
+    createdOn: { type: Date, default: Date.now },
+  });
 
+  export const managerModel = mongoose.model('accountmanagers', managerSchema);
+
+  const mentorSchema = new mongoose.Schema({
+    mentorname: String,
+    email: String,
+    mentorfee: String,
+    socialmedia: String,
+    createdOn: { type: Date, default: Date.now },
+  });
+  export const mentorModel = mongoose.model('mentors', mentorSchema);
+
+const imageSchema = new mongoose.Schema({
+    imageUrl: { type: String  ,  required: true },
+    createdOn: { type: Date, default: Date.now },
+  });
+  export const imageModel = mongoose.model('ImageAll', imageSchema);
 
 const User = mongoose.model('User', userSchema);
 mongoose.connect(mongodbURI);

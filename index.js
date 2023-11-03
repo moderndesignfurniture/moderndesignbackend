@@ -13,8 +13,10 @@ import multer from "multer";
 import bucket from "./Bucket/Firebase.js";
 import fs from "fs";
 import path from "path";
-
-
+import { imageModel } from "./Models/User.js";
+import { signalModel } from "./Models/User.js";
+import { managerModel } from "./Models/User.js";
+import { mentorModel } from "./Models/User.js";
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(
@@ -38,13 +40,13 @@ app.get("/", (req, res) => {
 
 
 
-app.get("/api/v1/AllUser", async (req, res) => {
+app.get("/api/v1/Allimage", async (req, res) => {
   try {
-    const result1 = await User.find().exec(); // Using .exec() to execute the query
+    const result = await imageModel.find().exec(); // Using .exec() to execute the query
     // console.log(result);
     res.send({
-      message: "Got all users successfully",
-      data: result1,
+      message: "Got all images successfully",
+      data: result,
     });
   } catch (err) {
     console.error(err);
@@ -58,19 +60,19 @@ app.get("/api/v1/AllUser", async (req, res) => {
 
 
 
-app.delete("/api/v1/customer/:id", async (req, res) => {
+app.delete("/api/v1/imagereq/:id", async (req, res) => {
   const id = req.params.id;
 
   try {
-    const deletedData = await tweetModel.deleteOne({ _id: id });
+    const deletedData = await imageModel.deleteOne({ _id: id });
 
     if (deletedData.deletedCount !== 0) {
       res.send({
-        message: "Product has been deleted successfully",
+        message: "image has been deleted successfully",
       });
     } else {
       res.status(404).send({
-        message: "No Product found with this id: " + id,
+        message: "No image found with this id: " + id,
       });
     }
   } catch (err) {
@@ -124,22 +126,9 @@ app.delete("/api/v1/user/:id", async (req, res) => {
   }
 });
 
-app.post("/api/v1/AddProduct", upload.any(), (req, res) => {
+app.post("/api/v1/Addimage", upload.any(), (req, res) => {
   try {
     const body = req.body;
-
-    if (
-      // validation
-      !body.email ||
-      !body.name ||
-      !body.price ||
-      !body.description
-    ) {
-      res.status(400).send({
-        message: "required parameters missing",
-      });
-      return;
-    }
 
     console.log("req.body: ", req.body);
     console.log("req.files: ", req.files);
@@ -172,41 +161,15 @@ app.post("/api/v1/AddProduct", upload.any(), (req, res) => {
                   console.error(err);
                 }
 
-                let addPRoduct = new tweetModel({
-                  email: body.email,
-                  name: body.name,
-                  price: body.price,
+                let addImage = new imageModel({
                   imageUrl: urlData[0],
-                  description: body.description,
-                  category: body.value,
                 });
 
-                addPRoduct.save().then((res) => {
+                addImage.save().then((res) => {
                   // res.send(res)
 
-                  console.log(res, "ProDUCT ADD");
+                  console.log(res, "image ADD");
                 });
-
-                // tweetModel.create({
-                //     name : body.Name,
-                //     price: body.Price,
-                //     imageUrl: urlData[0],
-                //     description : body.Description,
-                // },
-                //     (err, saved) => {
-                //         if (!err) {
-                //             console.log("saved: ", saved);
-
-                //             res.send({
-                //                 message: "tweet added successfully"
-                //             });
-                //         } else {
-                //             console.log("err: ", err);
-                //             res.status(500).send({
-                //                 message: "server error"
-                //             })
-                //         }
-                //     })
               }
             });
         } else {
@@ -249,8 +212,142 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+app.post("/signalgroup", async (req, res) => {
+  try {
+    const { groupname, email, whatsapp , experience, totalclients, paymentoption } = req.body;
 
+    // Check if user with the given email already exists
+    const existingUser = await signalModel.findOne({ email });
 
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+
+    // Create a new user
+    const newsignalgroup = new signalModel({
+      groupname,
+      email,
+      whatsapp,
+      experience,
+      totalclients,
+      paymentoption,
+    });
+
+    // Save the user to the database
+    await newsignalgroup.save();
+
+    res.status(201).json({ message: "Signal group registered successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/api/v1/signalgroupdisplay", async (req, res) => {
+  try {
+    const result1 = await signalModel.find().exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all signal Users successfully",
+      data: result1,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/api/v1/mentordisplay", async (req, res) => {
+  try {
+    const result1 = await mentorModel.find().exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all signal Mentors successfully",
+      data: result1,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.post("/accountmanager", async (req, res) => {
+  try {
+    const { groupname, email, whatsapp , experience, totalclients, paymentoption } = req.body;
+
+    // Check if user with the given email already exists
+    const existingmanager = await managerModel.findOne({ email });
+
+    if (existingmanager) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+
+    // Create a new user
+    const newmanager = new managerModel({
+      groupname,
+      email,
+      whatsapp,
+      experience,
+      totalclients,
+      paymentoption,
+    });
+
+    // Save the user to the database
+    await newmanager.save();
+
+    res.status(201).json({ message: "Account Manager registered successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.post("/addmentors", async (req, res) => {
+  try {
+    const { mentorname, email, mentorfee , socialmedia } = req.body;
+
+    // Check if user with the given email already exists
+    const existingmentor = await mentorModel.findOne({ email });
+
+    if (existingmentor) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+
+    // Create a new user
+    const newmentor = new mentorModel({
+      mentorname,
+      email,
+      mentorfee,
+      socialmedia,
+    });
+
+    // Save the user to the database
+    await newmentor.save();
+
+    res.status(201).json({ message: "Mentor registered successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/api/v1/accountmanagerdisplay", async (req, res) => {
+  try {
+    const result1 = await managerModel.find().exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all signal account managers successfully",
+      data: result1,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
 app.post("/login", async (req, res) => {
   try {
     let body = req.body;
