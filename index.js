@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(
   cors({
-    origin: ["https://forex-comp.vercel.app", "*"],
+    origin: ["http://localhost:3000", "*"],
     credentials: true,
   })
 );
@@ -42,7 +42,7 @@ app.get("/", (req, res) => {
 
 app.get("/api/v1/Allimage", async (req, res) => {
   try {
-    const result = await imageModel.find().exec(); // Using .exec() to execute the query
+    const result = await imageModel.find().sort({imageUrl: -1}).exec(); // Using .exec() to execute the query
     // console.log(result);
     res.send({
       message: "Got all images successfully",
@@ -126,7 +126,7 @@ app.delete("/api/v1/user/:id", async (req, res) => {
   }
 });
 
-app.post("/api/v1/Addimage", upload.any(), (req, res) => {
+app.post("/Addimage", upload.any(), (req, res) => {
   try {
     const body = req.body;
 
