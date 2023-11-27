@@ -17,6 +17,8 @@ import { imageModel } from "./Models/User.js";
 import { signalModel } from "./Models/User.js";
 import { managerModel } from "./Models/User.js";
 import { mentorModel } from "./Models/User.js";
+import Stripe from "stripe";
+const stripe = Stripe('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');
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({origin: true, credentials: true}));
@@ -448,7 +450,7 @@ app.get("/api/v1/profile", (req, res) => {
     try {
       const user = await User.findOne(
         { _id: _id },
-        "email password username phone country -_id"
+        "email password username phone country _id"
       ).exec();
       if (!user) {
         res.status(404).send({});
@@ -503,8 +505,140 @@ app.post("/logout", (req, res) => {
 
 // admin product request api
 
+app.post("/checkout", async (req, res) => {
+  try {
+    const { email, username, country , phone, price } = req.body;
+
+   const session = await stripe.Checkout.Sessions.create({
+    payment_method_types:["card"],
+    mode:"payment",
+    line_items:req.body.items.map(item=>{
+      return {
+        price_data: {
+          currency:"usd",
+          product_data:{
+            name:username
+          },
+          unit_amount:(price)*100,
+        },
+        quantity:1
+      }
+    }),
+    success_url:"http://localhost:3000/success",
+    cancel_url:"http://localhost:3000/cancel"
+   })
+   res.json({url:session.url})
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.post("/checkoutsession", async (req, res) => {
+  try {
+    const responce = req.body.responce;
+    const price = req.body.price;
+const lineitems = req.body.responce.map((product) => ({
+  price_data: {
+    currency: "usd",
+    product_data: {
+      name: product.username
+    },
+    unit_amount:price*100,
+  },
+  quantity: 1
+
+}));
+    const session = await stripe.Checkout.Sessions.create ({
+      payment_method_types: ["cards"],
+      line_items:lineitems,
+      mode:"payment",
+      success_url:"http://localhost:3000/success",
+      cancel_url:"http://localhost:3000/cancel"
+    });
+    res.json({id:session.id})
+
+console.log("resp",responce)
 
 
+
+
+
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.post("/checkout-sess", async (req, res) => {
+  try {
+  //  const products = req.body.products;
+   // const price = req.body.prices;
+
+    const responce = req.body.responce;
+    const price = req.body.price;
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types:["card"],
+      mode:"payment",
+      line_items: [
+        {
+          price_data: {
+            currency:"usd",
+            product_data:{
+              name:responce.username
+            }, 
+            unit_amount:(price)*100,
+          },
+          // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+          quantity: 1,
+        },
+      ],
+
+      success_url:"http://localhost:3000/success",
+      cancel_url:"http://localhost:3000/cancel"
+     })
+     res.json({url:session.url})
+    console.log("us",responce.username);
+    console.log("pr",price)
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+
+app.post('/create-checkout-session', async (req, res) => {
+  const responce = req.body.responce;
+  const price = req.body.price;
+  const packages = req.body.packages;
+  console.log("pk",packages)
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: packages,
+          },
+          unit_amount: (price)*100,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: 'payment',
+      success_url:"http://localhost:3000/success",
+      cancel_url:"http://localhost:3000/cancel",
+  });
+
+  res.send({url: session.url});
+});
 
 // Start the server
 app.listen(port, () => {
