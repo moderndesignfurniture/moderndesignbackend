@@ -18,6 +18,7 @@ const singlegroupSchema = new mongoose.Schema({
     experience: String,
     totalclients: String,
     paymentoption: String,
+    isApproved: { type: Boolean, default: false },
     createdOn: { type: Date, default: Date.now },
   });
   export const signalModel = mongoose.model('signalgroup', singlegroupSchema);
@@ -29,6 +30,7 @@ const singlegroupSchema = new mongoose.Schema({
     experience: String,
     totalclients: String,
     paymentoption: String,
+    isApproved: { type: Boolean, default: false },
     createdOn: { type: Date, default: Date.now },
   });
 
@@ -39,6 +41,7 @@ const singlegroupSchema = new mongoose.Schema({
     email: String,
     mentorfee: String,
     socialmedia: String,
+    isApproved: { type: Boolean, default: false },
     createdOn: { type: Date, default: Date.now },
   });
   export const mentorModel = mongoose.model('mentors', mentorSchema);

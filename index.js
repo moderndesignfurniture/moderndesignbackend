@@ -243,7 +243,7 @@ app.post("/signalgroup", async (req, res) => {
 
 app.get("/api/v1/signalgroupdisplay", async (req, res) => {
   try {
-    const result1 = await signalModel.find().exec(); // Using .exec() to execute the query
+    const result1 = await signalModel.find({isApproved : true}).exec(); // Using .exec() to execute the query
     // console.log(result);
     res.send({
       message: "Got all signal Users successfully",
@@ -256,9 +256,75 @@ app.get("/api/v1/signalgroupdisplay", async (req, res) => {
     });
   }
 });
+app.get("/signalgroupdisplayfalse", async (req, res) => {
+  try {
+    const result = await signalModel.find({isApproved : false}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all products successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.delete("/signalgroupdisplaydel/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const deletedData = await signalModel.deleteOne({ _id: id });
+
+    if (deletedData.deletedCount !== 0) {
+      res.send({
+        message: "mentor has been deleted successfully",
+      });
+    } else {
+      res.status(404).send({
+        message: "No mentor found with this id: " + id,
+      });
+    }
+    console.log("id",id);
+  } catch (err) {
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/signalgroupdisplayapprove/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const FindData = await signalModel.findById({ _id: id });
+
+    if (FindData) {
+     // FindData.isApproved = true;
+   await FindData.updateOne({ isApproved: true });
+      res.send({
+        message: "mentor has been approved successfully",
+        data : FindData,
+      });
+    } else {
+      res.status(404).send({
+        message: "No Product found with this id: " + id,
+      });
+    }
+    console.log("data",FindData);
+    console.log("id",id);
+  } catch (err) {
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+
+});
+
 app.get("/api/v1/mentordisplay", async (req, res) => {
   try {
-    const result1 = await mentorModel.find().exec(); // Using .exec() to execute the query
+    const result1 = await mentorModel.find({isApproved : true}).exec(); // Using .exec() to execute the query
     // console.log(result);
     res.send({
       message: "Got all signal Mentors successfully",
@@ -271,7 +337,70 @@ app.get("/api/v1/mentordisplay", async (req, res) => {
     });
   }
 });
+app.get("/mentorfalse", async (req, res) => {
+  try {
+    const result = await mentorModel.find({isApproved : false}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all products successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.delete("/mentordel/:id", async (req, res) => {
+  const id = req.params.id;
 
+  try {
+    const deletedData = await mentorModel.deleteOne({ _id: id });
+
+    if (deletedData.deletedCount !== 0) {
+      res.send({
+        message: "mentor has been deleted successfully",
+      });
+    } else {
+      res.status(404).send({
+        message: "No mentor found with this id: " + id,
+      });
+    }
+    console.log("id",id);
+  } catch (err) {
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/mentorreqedit/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const FindData = await mentorModel.findById({ _id: id });
+
+    if (FindData) {
+     // FindData.isApproved = true;
+   await FindData.updateOne({ isApproved: true });
+      res.send({
+        message: "mentor has been approved successfully",
+        data : FindData,
+      });
+    } else {
+      res.status(404).send({
+        message: "No Product found with this id: " + id,
+      });
+    }
+    console.log("data",FindData);
+    console.log("id",id);
+  } catch (err) {
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+
+});
 app.post("/accountmanager", async (req, res) => {
   try {
     const { groupname, email, whatsapp , experience, totalclients, paymentoption } = req.body;
@@ -333,7 +462,7 @@ app.post("/addmentors", async (req, res) => {
 
 app.get("/api/v1/accountmanagerdisplay", async (req, res) => {
   try {
-    const result1 = await managerModel.find().exec(); // Using .exec() to execute the query
+    const result1 = await managerModel.find({ isApproved: true }).exec(); // Using .exec() to execute the query
     // console.log(result);
     res.send({
       message: "Got all signal account managers successfully",
@@ -346,6 +475,72 @@ app.get("/api/v1/accountmanagerdisplay", async (req, res) => {
     });
   }
 });
+app.get("/accountmanagerfalse", async (req, res) => {
+  try {
+    const result = await managerModel.find({isApproved : false}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all products successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.delete("/accountmanagerdel/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const deletedData = await managerModel.deleteOne({ _id: id });
+
+    if (deletedData.deletedCount !== 0) {
+      res.send({
+        message: "mentor has been deleted successfully",
+      });
+    } else {
+      res.status(404).send({
+        message: "No mentor found with this id: " + id,
+      });
+    }
+    console.log("id",id);
+  } catch (err) {
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/accountmanagerapprove/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const FindData = await managerModel.findById({ _id: id });
+
+    if (FindData) {
+     // FindData.isApproved = true;
+   await FindData.updateOne({ isApproved: true });
+      res.send({
+        message: "mentor has been approved successfully",
+        data : FindData,
+      });
+    } else {
+      res.status(404).send({
+        message: "No Product found with this id: " + id,
+      });
+    }
+    console.log("data",FindData);
+    console.log("id",id);
+  } catch (err) {
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+
+});
+
 app.post("/login", async (req, res) => {
   try {
     let body = req.body;
@@ -565,8 +760,8 @@ app.post('/create-checkout-session', async (req, res) => {
       },
     ],
     mode: 'payment',
-      success_url:"https://forex-comp.vercel.app/success",
-      cancel_url:"https://forex-comp.vercel.app/cancel",
+      success_url:"https://myforexcompetition.com/",
+      cancel_url:"https://myforexcompetition.com/",
   });
 
   res.send({url: session.url});
