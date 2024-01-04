@@ -21,7 +21,7 @@ import Stripe from "stripe";
 const stripe = Stripe('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');
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors({origin: true, credentials: true}));
+//app.use(cors({origin: true, credentials: true}));
 
 const storage = multer.diskStorage({
   destination: "/tmp",
