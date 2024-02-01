@@ -1,5 +1,5 @@
 import express from "express";
-import User from "./Models/User.js"; // Adjust the path based on your directory structure
+import imageModel from "./Models/User.js"; // Adjust the path based on your directory structure
 import bcrypt from "bcrypt";
 import crypto from "crypto"; // Import the 'crypto' module
 import jwt from "jsonwebtoken"; // Import the jsonwebtoken library
@@ -13,15 +13,9 @@ import multer from "multer";
 import bucket from "./Bucket/Firebase.js";
 import fs from "fs";
 import path from "path";
-import { imageModel } from "./Models/User.js";
-import { signalModel } from "./Models/User.js";
-import { managerModel } from "./Models/User.js";
-import { mentorModel } from "./Models/User.js";
-import Stripe from "stripe";
-const stripe = Stripe('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');
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
-//app.use(cors({origin: true, credentials: true}));
+app.use(cors({origin: true, credentials: true}));
 
 const storage = multer.diskStorage({
   destination: "/tmp",
@@ -37,10 +31,271 @@ app.get("/", (req, res) => {
 });
 
 
-
-app.get("/api/v1/Allimage", async (req, res) => {
+app.post("/addimagetest", upload.array('images', 6), (req, res) => {
   try {
-    const result = await imageModel.find().sort({imageUrl: -1}).exec(); // Using .exec() to execute the query
+    const body = req.body;
+
+
+    console.log("req.body: ", req.body);
+    console.log("req.files: ", req.files);
+
+    // Iterate over the uploaded files
+    const uploadedFiles = req.files.map(file => {
+      console.log("uploaded file name: ", file.originalname);
+      console.log("file type: ", file.mimetype);
+      console.log("file name in server folders: ", file.filename);
+      console.log("file path in server folders: ", file.path);
+
+      return new Promise((resolve, reject) => {
+        bucket.upload(
+          file.path,
+          {
+            destination: `tweetPictures/${file.filename}`, 
+          },
+          function (err, cloudFile) {
+            if (!err) {
+              cloudFile
+                .getSignedUrl({
+                  action: "read",
+                  expires: "03-09-2999",
+                })
+                .then((urlData) => {
+                  console.log("public downloadable url: ", urlData[0]);
+                  // Remove the file from the server after uploading to the cloud
+                  fs.unlinkSync(file.path);
+                  resolve(urlData[0]);
+                })
+                .catch(reject);
+            } else {
+              console.log("err: ", err);
+              reject(err);
+            }
+          }
+        );
+      });
+    });
+
+    Promise.all(uploadedFiles)
+      .then(imageUrls => {
+        let addProduct = new imageModel({
+
+          service: body.service,
+          project: body.project,
+   
+         
+          imageUrl: imageUrls[0], // Save the first image URL
+
+
+          // ... Other fields
+        });
+
+        addProduct.save().then(() => {
+          res.send({
+            message: "Product added successfully",
+            data: addProduct,
+          });
+        });
+      })
+      .catch((error) => {
+        console.error("Error uploading files:", error);
+        res.status(500).send({
+          message: "Server error",
+        });
+      });
+  } catch (error) {
+    console.log("error: ", error);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+app.get("/Allimage", async (req, res) => {
+  try {
+    const result = await imageModel.find().exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/interiorimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({service: "Interior Design"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/exteriorimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({service: "Exterior Design"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/Archiimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({service: "Architecture & Construction"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/furniimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({service: "Custom Made Furniture"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/landscapeimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({service: "Landscaping & Gardening"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/studioimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({service: "3D Studio"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+
+//projects display
+
+app.get("/residentialimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({project: "Residential"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/commercialimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({project: "Commercial"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/corporateimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({project: "Corporate"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/shopsimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({project: "Shops"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/studiosimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({project: "Studios"}).exec(); // Using .exec() to execute the query
+    // console.log(result);
+    res.send({
+      message: "Got all images successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "Server error",
+    });
+  }
+});
+app.get("/roomsimage", async (req, res) => {
+  try {
+    const result = await imageModel.find({project: "Rooms"}).exec(); // Using .exec() to execute the query
     // console.log(result);
     res.send({
       message: "Got all images successfully",
@@ -56,9 +311,7 @@ app.get("/api/v1/Allimage", async (req, res) => {
 
 
 
-
-
-app.delete("/api/v1/imagereq/:id", async (req, res) => {
+app.delete("/imagereq/:id", async (req, res) => {
   const id = req.params.id;
 
   try {
@@ -79,409 +332,16 @@ app.delete("/api/v1/imagereq/:id", async (req, res) => {
     });
   }
 });
-app.delete("/api/v1/request/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const deletedData = await requestModel.deleteOne({ _id: id });
-
-    if (deletedData.deletedCount !== 0) {
-      res.send({
-        message: "request has been deleted successfully",
-      });
-    } else {
-      res.status(404).send({
-        message: "No request found with this id: " + id,
-      });
-    }
-  } catch (err) {
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
 
 
-app.delete("/api/v1/user/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const deletedData = await User.deleteOne({ _id: id });
-
-    if (deletedData.deletedCount !== 0) {
-      res.send({
-        message: "user has been deleted successfully",
-      });
-    } else {
-      res.status(404).send({
-        message: "No User found with this id: " + id,
-      });
-    }
-  } catch (err) {
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-
-app.post("/Addimage", upload.any(), (req, res) => {
-  try {
-    const body = req.body;
-
-    console.log("req.body: ", req.body);
-    console.log("req.files: ", req.files);
-
-    console.log("uploaded file name: ", req.files[0].originalname);
-    console.log("file type: ", req.files[0].mimetype);
-    console.log("file name in server folders: ", req.files[0].filename);
-    console.log("file path in server folders: ", req.files[0].path);
-
-    bucket.upload(
-      req.files[0].path,
-      {
-        destination: `tweetPictures/${req.files[0].filename}`, // give destination name if you want to give a certain name to file in bucket, include date to make name unique otherwise it will replace previous file with the same name
-      },
-      function (err, file, apiResponse) {
-        if (!err) {
-          file
-            .getSignedUrl({
-              action: "read",
-              expires: "03-09-2999",
-            })
-            .then((urlData, err) => {
-              if (!err) {
-                console.log("public downloadable url: ", urlData[0]); // this is public downloadable url
-
-                try {
-                  fs.unlinkSync(req.files[0].path);
-                  //file removed
-                } catch (err) {
-                  console.error(err);
-                }
-
-                let addImage = new imageModel({
-                  imageUrl: urlData[0],
-                });
-
-                addImage.save().then((res) => {
-                  // res.send(res)
-
-                  console.log(res, "image ADD");
-                });
-              }
-            });
-        } else {
-          console.log("err: ", err);
-          res.status(500).send();
-        }
-      }
-    );
-  } catch (error) {
-    console.log("error: ", error);
-  }
-});
-app.post("/signup", async (req, res) => {
-  try {
-    const { username, email, phone , country, password } = req.body;
-
-    // Check if user with the given email already exists
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
-
-    // Create a new user
-    const newUser = new User({
-      username,
-      email,
-      phone,
-      country,
-      password,
-    });
-
-    // Save the user to the database
-    await newUser.save();
-
-    res.status(201).json({ message: "User registered successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.post("/signalgroup", async (req, res) => {
-  try {
-    const { groupname, email, whatsapp , experience, totalclients, paymentoption } = req.body;
-
-    // Check if user with the given email already exists
-    const existingUser = await signalModel.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
-
-    // Create a new user
-    const newsignalgroup = new signalModel({
-      groupname,
-      email,
-      whatsapp,
-      experience,
-      totalclients,
-      paymentoption,
-    });
-
-    // Save the user to the database
-    await newsignalgroup.save();
-
-    res.status(201).json({ message: "Signal group registered successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.get("/api/v1/signalgroupdisplay", async (req, res) => {
-  try {
-    const result1 = await signalModel.find({isApproved : true}).exec(); // Using .exec() to execute the query
-    // console.log(result);
-    res.send({
-      message: "Got all signal Users successfully",
-      data: result1,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-app.get("/signalgroupdisplayfalse", async (req, res) => {
-  try {
-    const result = await signalModel.find({isApproved : false}).exec(); // Using .exec() to execute the query
-    // console.log(result);
-    res.send({
-      message: "Got all products successfully",
-      data: result,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-
-app.delete("/signalgroupdisplaydel/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const deletedData = await signalModel.deleteOne({ _id: id });
-
-    if (deletedData.deletedCount !== 0) {
-      res.send({
-        message: "mentor has been deleted successfully",
-      });
-    } else {
-      res.status(404).send({
-        message: "No mentor found with this id: " + id,
-      });
-    }
-    console.log("id",id);
-  } catch (err) {
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-app.get("/signalgroupdisplayapprove/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const FindData = await signalModel.findById({ _id: id });
-
-    if (FindData) {
-     // FindData.isApproved = true;
-   await FindData.updateOne({ isApproved: true });
-      res.send({
-        message: "mentor has been approved successfully",
-        data : FindData,
-      });
-    } else {
-      res.status(404).send({
-        message: "No Product found with this id: " + id,
-      });
-    }
-    console.log("data",FindData);
-    console.log("id",id);
-  } catch (err) {
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-
-});
-
-app.get("/api/v1/mentordisplay", async (req, res) => {
-  try {
-    const result1 = await mentorModel.find({isApproved : true}).exec(); // Using .exec() to execute the query
-    // console.log(result);
-    res.send({
-      message: "Got all signal Mentors successfully",
-      data: result1,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-app.get("/mentorfalse", async (req, res) => {
-  try {
-    const result = await mentorModel.find({isApproved : false}).exec(); // Using .exec() to execute the query
-    // console.log(result);
-    res.send({
-      message: "Got all products successfully",
-      data: result,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-app.delete("/mentordel/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const deletedData = await mentorModel.deleteOne({ _id: id });
-
-    if (deletedData.deletedCount !== 0) {
-      res.send({
-        message: "mentor has been deleted successfully",
-      });
-    } else {
-      res.status(404).send({
-        message: "No mentor found with this id: " + id,
-      });
-    }
-    console.log("id",id);
-  } catch (err) {
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-app.get("/mentorreqedit/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const FindData = await mentorModel.findById({ _id: id });
-
-    if (FindData) {
-     // FindData.isApproved = true;
-   await FindData.updateOne({ isApproved: true });
-      res.send({
-        message: "mentor has been approved successfully",
-        data : FindData,
-      });
-    } else {
-      res.status(404).send({
-        message: "No Product found with this id: " + id,
-      });
-    }
-    console.log("data",FindData);
-    console.log("id",id);
-  } catch (err) {
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-
-});
-app.post("/accountmanager", async (req, res) => {
-  try {
-    const { groupname, email, whatsapp , experience, totalclients, paymentoption } = req.body;
-
-    // Check if user with the given email already exists
-    const existingmanager = await managerModel.findOne({ email });
-
-    if (existingmanager) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
-
-    // Create a new user
-    const newmanager = new managerModel({
-      groupname,
-      email,
-      whatsapp,
-      experience,
-      totalclients,
-      paymentoption,
-    });
-
-    // Save the user to the database
-    await newmanager.save();
-
-    res.status(201).json({ message: "Account Manager registered successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-app.post("/addmentors", async (req, res) => {
-  try {
-    const { mentorname, email, mentorfee , socialmedia } = req.body;
-
-    // Check if user with the given email already exists
-    const existingmentor = await mentorModel.findOne({ email });
-
-    if (existingmentor) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
-
-    // Create a new user
-    const newmentor = new mentorModel({
-      mentorname,
-      email,
-      mentorfee,
-      socialmedia,
-    });
-
-    // Save the user to the database
-    await newmentor.save();
-
-    res.status(201).json({ message: "Mentor registered successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
 
 app.get("/api/v1/accountmanagerdisplay", async (req, res) => {
   try {
-    const result1 = await managerModel.find({ isApproved: true }).exec(); // Using .exec() to execute the query
+    const result1 = await imageModel.find({ isApproved: true }).exec(); // Using .exec() to execute the query
     // console.log(result);
     res.send({
       message: "Got all signal account managers successfully",
       data: result1,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-app.get("/accountmanagerfalse", async (req, res) => {
-  try {
-    const result = await managerModel.find({isApproved : false}).exec(); // Using .exec() to execute the query
-    // console.log(result);
-    res.send({
-      message: "Got all products successfully",
-      data: result,
     });
   } catch (err) {
     console.error(err);
@@ -495,7 +355,7 @@ app.delete("/accountmanagerdel/:id", async (req, res) => {
   const id = req.params.id;
 
   try {
-    const deletedData = await managerModel.deleteOne({ _id: id });
+    const deletedData = await imageModel.deleteOne({ _id: id });
 
     if (deletedData.deletedCount !== 0) {
       res.send({
@@ -513,259 +373,12 @@ app.delete("/accountmanagerdel/:id", async (req, res) => {
     });
   }
 });
-app.get("/accountmanagerapprove/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const FindData = await managerModel.findById({ _id: id });
-
-    if (FindData) {
-     // FindData.isApproved = true;
-   await FindData.updateOne({ isApproved: true });
-      res.send({
-        message: "mentor has been approved successfully",
-        data : FindData,
-      });
-    } else {
-      res.status(404).send({
-        message: "No Product found with this id: " + id,
-      });
-    }
-    console.log("data",FindData);
-    console.log("id",id);
-  } catch (err) {
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-
-});
-
-app.post("/login", async (req, res) => {
-  try {
-    let body = req.body;
-    body.email = body.email.toLowerCase();
-
-    if (!body.email || !body.password) {
-      res.status(400).send(`required fields missing, request example: ...`);
-      return;
-    }
-
-    // check if user exists
-    const data = await User.findOne(
-      { email: body.email },
-      "username email password"
-    );
-
-    if (data && body.password === data.password) {
-      // user found
-      console.log("User Successfully Logged In !");
-      console.log("data: ", data);
-
-      const token = jwt.sign(
-        {
-          _id: data._id,
-          email: data.email,
-          iat: Math.floor(Date.now() / 1000) - 30,
-          exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
-        },
-        SECRET
-      );
-
-      console.log("token: ", token);
-
-      res.cookie("Token", token, {
-        maxAge: 86_400_000,
-        httpOnly: true,
-        sameSite: "none",
-        secure: true,
-      });
-
-      res.send({
-        message: "login successful",
-        profile: {
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          age: data.age,
-          _id: data._id,
-        },
-      });
-
-      return;
-    } else {
-      // user not found
-      console.log("user not found");
-      res.status(401).send({ message: "Incorrect email or password" });
-    }
-  } catch (error) {
-    console.log("error: ", error);
-    res.status(500).send({ message: "login failed, please try later" });
-  }
-});
-app.use("/api/v1", (req, res, next) => {
-  console.log("req.cookies: ", req.cookies.Token);
-
-  if (!req?.cookies?.Token) {
-    res.status(401).send({
-      message: "include http-only credentials with every request",
-    });
-    return;
-  }
-
-  jwt.verify(req.cookies.Token, SECRET, function (err, decodedData) {
-    if (!err) {
-      console.log("decodedData: ", decodedData);
-
-      const nowDate = new Date().getTime() / 1000;
-
-      if (decodedData.exp < nowDate) {
-        res.status(401);
-        res.cookie("Token", "", {
-          maxAge: 1,
-          httpOnly: true,
-          sameSite: "none",
-          secure: true,
-        });
-        res.send({ message: "token expired" });
-      } else {
-        console.log("token approved");
-
-        req.body.token = decodedData;
-        next();
-      }
-    } else {
-      res.status(401).send("invalid token");
-    }
-  });
-});
-app.get("/api/v1/profile", (req, res) => {
-  const _id = req.body.token._id;
-  const getData = async () => {
-    try {
-      const user = await User.findOne(
-        { _id: _id },
-        "email password username phone country _id"
-      ).exec();
-      if (!user) {
-        res.status(404).send({});
-        return;
-      } else {
-        res.set({
-          "Cache-Control":
-            "no-store, no-cache, must-revalidate, proxy-revalidate",
-          Pragma: "no-cache",
-          Expires: "0",
-          "Surrogate-Control": "no-store",
-        });
-        res.status(200).send(user);
-      }
-    } catch (error) {
-      console.log("error: ", error);
-      res.status(500).send({
-        message: "something went wrong on server",
-      });
-    }
-  };
-  getData();
-});
-app.post("/logout", (req, res) => {
-  try {
-    //   res.clearCookie('Token', {
-    //     httpOnly: true,
-    //     samesite: "none",
-    //     secure: true
-    // });
-    // res.send({ message: "logged out successful" })
-
-    res.cookie("Token", "", {
-      maxAge: 0,
-      httpOnly: true,
-      sameSite: "none", // Change to 'strict' if not using HTTPS
-      secure: true, // Remove this line if not using HTTPS
-      path: "/", // Make sure the path matches the one used when setting the token cookie
-      domain: "http://localhost:3000/", // Make sure the domain matches the one used when setting the token cookie
-    });
-    res.send({ message: "Logged out successful" });
-    
-  } catch (error) {
-    console.error("Error clearing cookie:", error);
-    res.status(500).send({ message: "Logout failed, please try later" });
-  }
-});
 
 
 
 
 
-// admin product request api
 
-
-
-app.post("/checkout-sess", async (req, res) => {
-  try {
-  //  const products = req.body.products;
-   // const price = req.body.prices;
-
-    const responce = req.body.responce;
-    const price = req.body.price;
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types:["card"],
-      mode:"payment",
-      line_items: [
-        {
-          price_data: {
-            currency:"usd",
-            product_data:{
-              name:responce.username
-            }, 
-            unit_amount:(price)*100,
-          },
-          // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-          quantity: 1,
-        },
-      ],
-
-      success_url:"http://localhost:3000/success",
-      cancel_url:"http://localhost:3000/cancel"
-     })
-     res.json({url:session.url})
-    console.log("us",responce.username);
-    console.log("pr",price)
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-
-
-app.post('/create-checkout-session', async (req, res) => {
-  const responce = req.body.responce;
-  const price = req.body.price;
-  const packages = req.body.packages;
-  console.log("pk",packages)
-  const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: packages,
-          },
-          unit_amount: (price)*100,
-        },
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-      success_url:"https://myforexcompetition.com/",
-      cancel_url:"https://myforexcompetition.com/",
-  });
-
-  res.send({url: session.url});
-});
 
 // Start the server
 app.listen(port, () => {

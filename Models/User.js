@@ -1,58 +1,18 @@
 import mongoose from 'mongoose';
-const mongodbURI = process.env.mongodbURI || "mongodb+srv://shaikhahsanali0303:brandsteps1234@cluster0.fh825iv.mongodb.net/?retryWrites=true&w=majority";
+const mongodbURI = process.env.mongodbURI || "mongodb+srv://shaikhahsanali0303:interiordesigning@cluster0.35agjm7.mongodb.net/?retryWrites=true&w=majority";
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-const userSchema = new mongoose.Schema({
-  username: String,
-  email: String,
-  phone: String,
-  country: String,
-  password: String,
-  createdOn: { type: Date, default: Date.now },
-});
 
-const singlegroupSchema = new mongoose.Schema({
-    groupname: String,
-    email: String,
-    whatsapp: String,
-    experience: String,
-    totalclients: String,
-    paymentoption: String,
-    isApproved: { type: Boolean, default: false },
-    createdOn: { type: Date, default: Date.now },
-  });
-  export const signalModel = mongoose.model('signalgroup', singlegroupSchema);
-
-  const managerSchema = new mongoose.Schema({
-    groupname: String,
-    email: String,
-    whatsapp: String,
-    experience: String,
-    totalclients: String,
-    paymentoption: String,
-    isApproved: { type: Boolean, default: false },
-    createdOn: { type: Date, default: Date.now },
-  });
-
-  export const managerModel = mongoose.model('accountmanagers', managerSchema);
-
-  const mentorSchema = new mongoose.Schema({
-    mentorname: String,
-    email: String,
-    mentorfee: String,
-    socialmedia: String,
-    isApproved: { type: Boolean, default: false },
-    createdOn: { type: Date, default: Date.now },
-  });
-  export const mentorModel = mongoose.model('mentors', mentorSchema);
 
 const imageSchema = new mongoose.Schema({
+  service: { type: String  ,  required: true },
+  project: { type: String  ,  required: true },
+
     imageUrl: { type: String  ,  required: true },
     createdOn: { type: Date, default: Date.now },
   });
   export const imageModel = mongoose.model('ImageAll', imageSchema);
 
-const User = mongoose.model('User', userSchema);
 mongoose.connect(mongodbURI);
 ////////////////mongodb connected disconnected events///////////////////////////////////////////////
 mongoose.connection.on('connected', function () {//connected
@@ -78,4 +38,4 @@ process.on('SIGINT', function () {/////this function will run jst before app is 
 });
 ////////////////mongodb connected disconnected events///////////////////////////////////////////////
 
-export default User;
+export default imageModel;
