@@ -334,52 +334,6 @@ app.delete("/imagereq/:id", async (req, res) => {
 });
 
 
-
-app.get("/api/v1/accountmanagerdisplay", async (req, res) => {
-  try {
-    const result1 = await imageModel.find({ isApproved: true }).exec(); // Using .exec() to execute the query
-    // console.log(result);
-    res.send({
-      message: "Got all signal account managers successfully",
-      data: result1,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-
-app.delete("/accountmanagerdel/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const deletedData = await imageModel.deleteOne({ _id: id });
-
-    if (deletedData.deletedCount !== 0) {
-      res.send({
-        message: "mentor has been deleted successfully",
-      });
-    } else {
-      res.status(404).send({
-        message: "No mentor found with this id: " + id,
-      });
-    }
-    console.log("id",id);
-  } catch (err) {
-    res.status(500).send({
-      message: "Server error",
-    });
-  }
-});
-
-
-
-
-
-
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
